@@ -1,9 +1,11 @@
-from operator import index
+import json
+
+
 from pickle import FALSE, TRUE
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse,HttpResponse,HttpRequest
 import sys
 sys.path.insert(0,'/Users/macbookair/Dev/project/pharma-v-recharche/PharmaSearch/PharmaApp/service')
-from search import clusterPharmacy,getNearestNeigbors
+from search import clusterPharmacy,getNearestNeigbors,setClusterInDB,getNearsetPharmacyFromDB
 from django.shortcuts import render
 from django.db import connection 
 from rest_framework.response import Response
@@ -12,9 +14,9 @@ from .models import pharmaLocation
 from .serializers import PharmacySerializer
 from rest_framework.decorators import api_view
 import pandas as pd
-from time import sleep
 
-import httpx
+
+
 # Create your views here.
 
 
@@ -22,18 +24,19 @@ import httpx
 
 @api_view(['GET'])
 def getData(request):
-    pharmacy=pharmaLocation.objects.all()
-    pharmacy_serializer=PharmacySerializer(pharmacy,many=TRUE)
-    dataframe=pd.read_sql_query("select * from PharmaApp_pharmalocation",connection)
-    df,client= clusterPharmacy(dataframe)
-    predection=getNearestNeigbors(df,client)
-    print(predection)    
-    return Response(pharmacy_serializer.data)
+    clusterPharmacy()
+    return Response('the data being grouped , please wait ')
 
 
 @api_view(['POST'])
-def postData(request):
-    serializer=PharmacySerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
+def postData(HttpRequest):
+    body_unicode = HttpRequest.body.decode('utf-8')
+    data=json.loads(body_unicode)
+    longitude=data['longitude']
+    latitude=data['latitude']
+    prd=getNearestNeigbors(latitude,longitude)
+    phrma=getNearsetPharmacyFromDB(prd[0])
+    
+    
+    
+    return Response(phrma)
