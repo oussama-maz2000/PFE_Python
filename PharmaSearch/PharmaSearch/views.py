@@ -7,8 +7,6 @@ from .search import getNearestNeigborsClient,setClusterInDB,getNearsetPharmacyFr
 
 @api_view(['GET'])
 def welcome(HttpRequest):
-    clusterPharmacy();
-    #scaler()
     return Response("hello world from django ")
 
 
@@ -17,5 +15,4 @@ def getNearestPharmacy(HttpRequest):
     body_unicode = HttpRequest.body.decode('utf-8')
     data=json.loads(body_unicode)
     prd=getNearestNeigborsClient(data['latitude'],data['longitude'])
-    print(prd)
     return Response(prd[0]) 

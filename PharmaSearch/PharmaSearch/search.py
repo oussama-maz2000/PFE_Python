@@ -16,14 +16,13 @@ def scaler():
     long=np.array(scaledinfo[0][1])
     data=np.concatenate((lat,long),axis=1)
     df = pd.DataFrame(data, columns = ['latitude','longitude'])
-    df.to_csv("/Users/macbookair/Dev/project/pharma-v-recharche/PharmaSearch/scaled.csv",index=False)    
+    #df.to_csv("/Users/macbookair/Dev/project/pharma-v-recharche/PharmaSearch/scaled.csv",index=False)    
     return df
 
 def clusterPharmacy():
     dataframe=pd.read_sql_query("select * from pharmacy",connection)
     dataframe.to_csv("/Users/macbookair/Dev/project/pharma-v-recharche/PharmaSearch/original.csv",index=False)
     ids=dataframe[['id']]
- 
     df1=scaler()
     clustering_model_no_cluster = AgglomerativeClustering()
     clustering_model_no_cluster.fit(df1[['latitude','longitude']])
@@ -75,14 +74,8 @@ def setClusterInDB():
         crsr.execute(query,dt)
     connection.commit() 
 
-def getNearsetPharmacyFromDB(num):
-    query='select * from pharmacy where cluster=%s'
-    crsr.execute(query,num)
-    pharmacy=crsr.fetchall()
-    return pharmacy
 
-def calculateScaler(dataframe,latitude,longitude):
-    
+def calculateScaler(dataframe,latitude,longitude): 
     minlatitude=dataframe['latitude'].min()
     minlongitude=dataframe['longitude'].min()
     maxlatitude=dataframe['latitude'].max()
